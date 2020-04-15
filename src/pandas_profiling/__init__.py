@@ -6,7 +6,6 @@ import json
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Union
 
 import joblib
 import numpy as np
@@ -68,7 +67,7 @@ class ProfileReport(object):
             else:  # waiting for load
                 self.df_hash = None
                 self.df = None
-                self.sample = None
+                self.sample = {'head': None, 'tail': None}
                 self.title = None
         else:  # do not save df content, compute now
             self.df = None
@@ -118,7 +117,7 @@ class ProfileReport(object):
             )
         return self._report
 
-    def get_sample(self, df: pd.DataFrame) -> Union[dict, None]:
+    def get_sample(self, df: pd.DataFrame) -> dict:
         """Get head/tail samples based on the configuration
 
         Args:
@@ -363,7 +362,7 @@ class ProfileReport(object):
                 self._description_set = description_set
             if self._report is None:
                 self._report = report
-            if self.sample is None:
+            if self.sample['head'] is None or self.sample['tail'] is None:
                 self.sample = sample
             self.df_hash = df_hash
             self.title = config["title"].get(str)
