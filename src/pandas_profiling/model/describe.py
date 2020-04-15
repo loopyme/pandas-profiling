@@ -55,6 +55,9 @@ def describe(df: pd.DataFrame) -> dict:
       +---------------------------------------------+ +-----------+
     """
 
+    if config['use_dask'].get(bool):
+        return ddescribe(df)
+
     if not isinstance(df, pd.DataFrame):
         warnings.warn("df is not of type pandas.DataFrame")
 
@@ -79,7 +82,7 @@ def describe(df: pd.DataFrame) -> dict:
     number_of_task = 7 + len(df.columns) + len(correlation_names)
 
     with tqdm(
-        total=number_of_task, desc="Describe", disable=disable_progress_bar
+            total=number_of_task, desc="Describe", disable=disable_progress_bar
     ) as pbar:
         series_description = get_series_descriptions(df, pbar)
         # Mapping from column name to variable type
@@ -182,7 +185,7 @@ def ddescribe(df: pd.DataFrame) -> dict:
         }
 
     def reduce(
-        table_stats, series_description, correlations, missing, messages, package
+            table_stats, series_description, correlations, missing, messages, package
     ):
         return {
             # Overall description
