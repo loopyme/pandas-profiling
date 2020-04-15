@@ -426,7 +426,7 @@ def get_series_descriptions(df, pbar):
             for i, (column, description) in enumerate(
                     executor.imap_unordered(multiprocess_1d, args)
             ):
-                pbar.set_postfix_str(f"Describe variable:{arg[0]}")
+                pbar.set_postfix_str(f"Describe variable:{column}")
                 series_description[column] = description
                 pbar.update()
 
