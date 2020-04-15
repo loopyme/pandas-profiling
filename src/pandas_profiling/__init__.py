@@ -31,7 +31,7 @@ class ProfileReport(object):
     """the HTML representation of the report, without the wrapper (containing `<head>` etc.)"""
 
     def __init__(
-            self, df=None, minimal=False, config_file: Path = None, lazy=True, **kwargs
+        self, df=None, minimal=False, config_file: Path = None, lazy=True, **kwargs
     ):
         if config_file is not None and minimal:
             raise ValueError(
@@ -73,9 +73,7 @@ class ProfileReport(object):
             self.df = None
             # preprocess df
             df = self.preprocess(df)
-            self.df_hash = joblib.hash(
-                df
-            )  # Note that it's compute after preprocess df
+            self.df_hash = joblib.hash(df)  # Note that it's compute after preprocess df
 
             # description_set and report will compute now
             self._description_set = describe_df(df)
@@ -92,8 +90,8 @@ class ProfileReport(object):
     def preprocess(df):
         # Treat index as any other column
         if (
-                not pd.Index(np.arange(0, len(df))).equals(df.index)
-                or df.index.dtype != np.int64
+            not pd.Index(np.arange(0, len(df))).equals(df.index)
+            or df.index.dtype != np.int64
         ):
             df = df.reset_index()
 
@@ -358,7 +356,7 @@ class ProfileReport(object):
             raise ValueError(f"Fail to load data:{e}")
 
         if (
-                df_hash == self.df_hash or self.df_hash is None
+            df_hash == self.df_hash or self.df_hash is None
         ) and config.md5() == config_md5:
             if self._description_set is None:
                 self._description_set = description_set
