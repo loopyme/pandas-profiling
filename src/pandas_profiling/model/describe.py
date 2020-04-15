@@ -109,6 +109,7 @@ def describe(df: pd.DataFrame) -> dict:
                 df, variables, correlation_name
             )
             pbar.update()
+        correlations = {key: value for key, value in correlations.items() if value is not None}
 
         # Scatter matrix
         pbar.set_postfix_str("Get scatter matrix")

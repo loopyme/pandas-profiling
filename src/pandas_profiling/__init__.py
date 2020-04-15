@@ -6,6 +6,7 @@ import json
 import warnings
 from datetime import datetime
 from pathlib import Path
+from typing import Union
 
 import joblib
 import numpy as np
@@ -31,7 +32,7 @@ class ProfileReport(object):
     """the HTML representation of the report, without the wrapper (containing `<head>` etc.)"""
 
     def __init__(
-        self, df=None, minimal=False, config_file: Path = None, lazy=True, **kwargs
+            self, df=None, minimal=False, config_file: Path = None, lazy=True, **kwargs
     ):
         if config_file is not None and minimal:
             raise ValueError(
@@ -90,8 +91,8 @@ class ProfileReport(object):
     def preprocess(df):
         # Treat index as any other column
         if (
-            not pd.Index(np.arange(0, len(df))).equals(df.index)
-            or df.index.dtype != np.int64
+                not pd.Index(np.arange(0, len(df))).equals(df.index)
+                or df.index.dtype != np.int64
         ):
             df = df.reset_index()
 
@@ -117,7 +118,7 @@ class ProfileReport(object):
             )
         return self._report
 
-    def get_sample(self, df: pd.DataFrame) -> dict:
+    def get_sample(self, df: pd.DataFrame) -> Union[dict, None]:
         """Get head/tail samples based on the configuration
 
         Args:
@@ -314,7 +315,7 @@ class ProfileReport(object):
         """Override so that Jupyter Notebook does not print the object."""
         return ""
 
-    def dumps(self):
+    def dumps(self) -> bytes:
         """
         Serialize ProfileReport and return bytes for reproducing ProfileReport or Caching.
 
@@ -335,7 +336,7 @@ class ProfileReport(object):
             ]
         )
 
-    def loads(self, data):
+    def loads(self, data: bytes):
         """
         Deserialize the bytes for reproducing ProfileReport or Caching.
 
@@ -356,7 +357,7 @@ class ProfileReport(object):
             raise ValueError(f"Fail to load data:{e}")
 
         if (
-            df_hash == self.df_hash or self.df_hash is None
+                df_hash == self.df_hash or self.df_hash is None
         ) and config.md5() == config_md5:
             if self._description_set is None:
                 self._description_set = description_set
