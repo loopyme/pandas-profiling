@@ -378,8 +378,10 @@ def describe_1d(series: pd.Series) -> dict:
             raise ValueError("Unexpected type")
 
     # light weight of series_description
-    del series_descriptions["value_counts_with_nan"]
-    del series_descriptions["value_counts_without_nan"]
+    if "value_counts_with_nan" in series_descriptions.keys():
+        del series_descriptions["value_counts_with_nan"]
+    if "value_counts_without_nan" in series_descriptions.keys():
+        del series_descriptions["value_counts_without_nan"]
 
     # Return the description obtained
     return series_descriptions
