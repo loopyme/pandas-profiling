@@ -13,7 +13,7 @@ from pandas_profiling.model.summary import (
     get_messages,
     sort_column_names,
     get_series_description,
-    dask_get_scatter_matrix,
+    get_delayed_scatter_matrix,
 )
 from pandas_profiling.utils.dask_diagnose import dask_diagnose
 from pandas_profiling.version import __version__
@@ -269,7 +269,7 @@ def ddescribe(df: pd.DataFrame) -> dict:
     missing = delayed(get_missing_diagrams)(df, table_stats)
 
     # Scatter matrix
-    scatter = dask_get_scatter_matrix(df, variables)
+    scatter = get_delayed_scatter_matrix(df, variables)
 
     # Get correlations
     correlations = get_delayed_correlations(df, variables)

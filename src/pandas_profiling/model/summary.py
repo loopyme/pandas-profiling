@@ -583,7 +583,7 @@ def get_scatter_matrix(df, variables):
     return scatter_matrix
 
 
-def dask_get_scatter_matrix(df, variables):
+def get_delayed_scatter_matrix(df, variables):
     from dask import delayed
 
     def reduce(*dict_items):
@@ -600,7 +600,7 @@ def dask_get_scatter_matrix(df, variables):
             for y in continuous_variables:
                 scatter_matrix[x][y] = delayed(scatter_pairwise)(df[x], df[y], x, y)
             scatter_matrix[x] = delayed(reduce)(*scatter_matrix[x].items())
-        scatter_matrix = delayed(reduce)(*scatter_matrix.items()).compute()
+        scatter_matrix = delayed(reduce)(*scatter_matrix.items())
     else:
         scatter_matrix = {}
 
