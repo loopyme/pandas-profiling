@@ -5,7 +5,12 @@ title: "Pandas Profiling Report"
 pool_size: 0
 
 # Use dask for describe
-use_dask: False
+dask:
+    use_dask: False
+    progress_bar: True
+    profiler: False
+    resource_profiler: False
+    cache_profiler: False
 
 # Show the progress bar
 progress_bar: True
@@ -89,7 +94,7 @@ plot:
 
     histogram:
 # is used for numeric variables
-        bayesian_blocks_bins: True
+        bayesian_blocks_bins: False
 
 # If 'bayesian_blocks_bins' fails to provide a valid number of bins.
         bins: 50

@@ -22,6 +22,7 @@ from pandas_profiling.model.messages import (
     warning_type_date,
     check_correlation_messages,
 )
+from pandas_profiling.utils.dask_diagnose import dask_diagnose
 from pandas_profiling.visualisation.missing import (
     missing_bar,
     missing_matrix,
@@ -576,6 +577,30 @@ def get_scatter_matrix(df, variables):
             for y in continuous_variables:
                 scatter_matrix[x][y] = scatter_pairwise(df[x], df[y], x, y)
 
+    else:
+        scatter_matrix = {}
+
+    return scatter_matrix
+
+
+def dask_get_scatter_matrix(df, variables):
+    from dask import delayed
+
+    def reduce(*dict_items):
+        return {k: v for k, v in dict_items}
+
+    if config["interactions"]["continuous"].get(bool):
+        continuous_variables = [
+            column for column, type in variables.items() if type == Variable.TYPE_NUM
+        ]
+        scatter_matrix = {
+            x: {y: "" for y in continuous_variables} for x in continuous_variables
+        }
+        for x in continuous_variables:
+            for y in continuous_variables:
+                scatter_matrix[x][y] = delayed(scatter_pairwise)(df[x], df[y], x, y)
+            scatter_matrix[x] = delayed(reduce)(*scatter_matrix[x].items())
+        scatter_matrix = delayed(reduce)(*scatter_matrix.items()).compute()
     else:
         scatter_matrix = {}
 

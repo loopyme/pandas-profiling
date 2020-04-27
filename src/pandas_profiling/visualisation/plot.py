@@ -222,14 +222,16 @@ def scatter_series(series, x_label="Width", y_label="Height") -> str:
 
 
 def scatter_pairwise(series1, series2, x_label, y_label) -> str:
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
 
     color = config["html"]["style"]["primary_color"].get(str)
 
     if len(series1) > 1000:
         cmap = sns.light_palette(color, as_cmap=True)
-        plt.hexbin(series1.tolist(), series2.tolist(), gridsize=15, cmap=cmap)
+        ax.hexbin(series1.tolist(), series2.tolist(), gridsize=15, cmap=cmap)
     else:
-        plt.scatter(series1.tolist(), series2.tolist(), color=color)
-    return plot_360_n0sc0pe(plt)
+        ax.scatter(series1.tolist(), series2.tolist(), color=color)
+    return plot_360_n0sc0pe(fig)

@@ -3,6 +3,9 @@ from io import BytesIO, StringIO
 from typing import Union, Tuple
 from urllib.parse import quote
 
+from matplotlib import pyplot
+from matplotlib.figure import Figure
+
 from pandas_profiling.config import config
 
 
@@ -56,16 +59,21 @@ def plot_360_n0sc0pe(plt, image_format: Union[str, None] = None, attempts=0) -> 
             mime_type = mime_types[image_format]
             image_data = quote(base64_data)
             result_string = f"data:{mime_type};base64,{image_data}"
-        plt.close()
+        if not isinstance(plt, Figure):
+            plt.close()
     except RuntimeError:
-        plt.close()
+        if not isinstance(plt, Figure):
+            plt.close()
         # Hack https://stackoverflow.com/questions/44666207/matplotlib-error-when-running-plotting-in-multiprocess
         # #comment79373127_44666207
+        print(attempts)
         if attempts > 10:
             return ""
         else:
             return plot_360_n0sc0pe(plt, image_format, attempts + 1)
     finally:
-        plt.close("all")
+        if not isinstance(plt, Figure):
+            plt.close()
 
+        pyplot.close()
     return result_string

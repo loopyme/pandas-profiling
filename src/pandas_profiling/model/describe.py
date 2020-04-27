@@ -4,6 +4,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 
 from pandas_profiling.config import config as config
+from pandas_profiling.model.correlations import calculate_correlation
 from pandas_profiling.model.summary import (
     get_series_descriptions,
     get_scatter_matrix,
@@ -12,8 +13,9 @@ from pandas_profiling.model.summary import (
     get_messages,
     sort_column_names,
     get_series_description,
+    dask_get_scatter_matrix,
 )
-from pandas_profiling.model.correlations import calculate_correlation
+from pandas_profiling.utils.dask_diagnose import dask_diagnose
 from pandas_profiling.version import __version__
 
 
@@ -54,8 +56,7 @@ def describe(df: pd.DataFrame) -> dict:
       |               messages*                     | |  missing* |
       +---------------------------------------------+ +-----------+
     """
-
-    if config["use_dask"].get(bool):
+    if config["dask"]["use_dask"].get(bool):
         return ddescribe(df)
 
     if not isinstance(df, pd.DataFrame):
@@ -146,8 +147,6 @@ def describe(df: pd.DataFrame) -> dict:
         "table": table_stats,
         # Per variable descriptions
         "variables": series_description,
-        # Bivariate relations
-        "scatter": scatter_matrix,
         # Correlation matrices
         "correlations": correlations,
         # Missing values
@@ -156,9 +155,12 @@ def describe(df: pd.DataFrame) -> dict:
         "messages": messages,
         # Package
         "package": package,
+        # Bivariate relations
+        "scatter": scatter_matrix,
     }
 
 
+@dask_diagnose
 def ddescribe(df: pd.DataFrame) -> dict:
     """describe implement with dask.delayed
 
@@ -188,7 +190,13 @@ def ddescribe(df: pd.DataFrame) -> dict:
         }
 
     def reduce(
-        table_stats, series_description, correlations, missing, messages, package
+        table_stats,
+        series_description,
+        correlations,
+        missing,
+        messages,
+        scatter,
+        package,
     ):
         return {
             # Overall description
@@ -201,11 +209,15 @@ def ddescribe(df: pd.DataFrame) -> dict:
             "missing": missing,
             # Warnings
             "messages": messages,
+            "scatter": scatter,
             # Package
             "package": package,
         }
 
-    def get_correlations(df, variables):
+    def reduce_dict(*items):
+        return {k: v for k, v in items}
+
+    def get_delayed_correlations(df, variables):
         correlation_names = [
             correlation_name
             for correlation_name in [
@@ -219,10 +231,16 @@ def ddescribe(df: pd.DataFrame) -> dict:
             if config["correlations"][correlation_name]["calculate"].get(bool)
         ]
         correlations = {
-            correlation_name: calculate_correlation(df, variables, correlation_name)
+            correlation_name: delayed(calculate_correlation)(
+                df, variables, correlation_name
+            )
             for correlation_name in correlation_names
         }
-        return {key: value for key, value in correlations.items() if value is not None}
+
+        def reduce(*correlations):
+            return {key: value for key, value in correlations if value is not None}
+
+        return delayed(reduce)(*correlations.items())
 
     if not isinstance(df, pd.DataFrame):
         warnings.warn("df is not of type pandas.DataFrame")
@@ -230,24 +248,31 @@ def ddescribe(df: pd.DataFrame) -> dict:
     if df.empty:
         raise ValueError("df can not be empty")
 
-    series_description = {
-        column: delayed(get_series_description)(series)
-        for column, series in df.iteritems()
-    }
+    series_description = delayed(reduce_dict)(
+        *(
+            {
+                column: delayed(get_series_description)(series)
+                for column, series in df.iteritems()
+            }.items()
+        )
+    ).compute()
 
-    variables = delayed(get_variables)(series_description)
+    variables = get_variables(series_description)
 
     # Transform the series_description in a DataFrame
     variable_stats = delayed(pd.DataFrame)(series_description)
-
-    # Get correlations
-    correlations = delayed(get_correlations)(df, variables)
 
     # Table statistics
     table_stats = delayed(get_table_stats)(df, variable_stats)
 
     # missing diagrams
     missing = delayed(get_missing_diagrams)(df, table_stats)
+
+    # Scatter matrix
+    scatter = dask_get_scatter_matrix(df, variables)
+
+    # Get correlations
+    correlations = get_delayed_correlations(df, variables)
 
     # Messages
     messages = delayed(get_messages)(table_stats, series_description, correlations)
@@ -257,11 +282,15 @@ def ddescribe(df: pd.DataFrame) -> dict:
         "pandas_profiling_config": config.dump(),
     }
 
+    # run the task
     description_set = delayed(reduce)(
-        table_stats, series_description, correlations, missing, messages, package
+        table_stats,
+        series_description,
+        correlations,
+        missing,
+        messages,
+        scatter,
+        package,
     ).compute()
-
-    # Scatter matrix: there always are something wrong with delayed-plot
-    description_set["scatter"] = get_scatter_matrix(df, description_set["variables"])
 
     return description_set
