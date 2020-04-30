@@ -43,8 +43,10 @@ from pandas_profiling.report.structure.variables import (
     render_url,
     render_generic,
 )
+from pandas_profiling.utils.log import Loger
 
 
+@Loger.log
 def get_missing_items(summary) -> list:
     image_format = config["plot"]["image_format"].get(str)
     items = []
@@ -64,6 +66,7 @@ def get_missing_items(summary) -> list:
 
 
 # TODO: split in per variable function
+@Loger.log
 def render_variables_section(dataframe_summary: dict) -> list:
     """Render the HTML for each of the variables in the DataFrame.
 
@@ -146,6 +149,7 @@ def render_variables_section(dataframe_summary: dict) -> list:
     return templs
 
 
+@Loger.log
 def get_sample_items(sample: dict):
     """Create the list of sample items
 
@@ -168,6 +172,7 @@ def get_sample_items(sample: dict):
     return items
 
 
+@Loger.log
 def get_scatter_matrix(scatter_matrix):
     image_format = config["plot"]["image_format"].get(str)
 
@@ -196,6 +201,7 @@ def get_scatter_matrix(scatter_matrix):
     return titems
 
 
+@Loger.log
 def get_dataset_items(
     summary: dict, date_start: datetime, date_end: datetime, warnings: list
 ) -> list:
@@ -210,10 +216,12 @@ def get_dataset_items(
     return items
 
 
+@Loger.log
 def get_section_items() -> List[Renderable]:
     return []
 
 
+@Loger.log
 def get_report_structure(
     date_start: datetime, date_end: datetime, sample: dict, summary: dict
 ) -> Renderable:

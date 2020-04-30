@@ -22,6 +22,7 @@ from pandas_profiling.model.messages import (
     warning_type_date,
     check_correlation_messages,
 )
+from pandas_profiling.utils.log import Loger
 from pandas_profiling.visualisation.missing import (
     missing_bar,
     missing_matrix,
@@ -42,6 +43,7 @@ def sort_column_names(dct: Mapping, sort: str):
     return dct
 
 
+@Loger.log
 def describe_1d(series: pd.Series) -> dict:
     """Describe a series (infer the variable type, then calculate type-specific values).
 
@@ -158,7 +160,9 @@ def describe_1d(series: pd.Series) -> dict:
             "n_infinite": n_infinite,
         }
 
-        chi_squared_threshold = config["vars"]["num"]["chi_squared_threshold"].get(float)
+        chi_squared_threshold = config["vars"]["num"]["chi_squared_threshold"].get(
+            float
+        )
         if chi_squared_threshold > 0.0:
             histogram, _ = np.histogram(finite_values, bins="auto")
             stats["chi_squared"] = chisquare(histogram)
@@ -179,7 +183,9 @@ def describe_1d(series: pd.Series) -> dict:
         bins = min(series_description["distinct_count_with_nan"], bins)
         stats["histogram_bins"] = bins
 
-        bayesian_blocks_bins = config["plot"]["histogram"]["bayesian_blocks_bins"].get(bool)
+        bayesian_blocks_bins = config["plot"]["histogram"]["bayesian_blocks_bins"].get(
+            bool
+        )
         if bayesian_blocks_bins:
             from astropy.stats import bayesian_blocks
 
@@ -389,10 +395,12 @@ def describe_1d(series: pd.Series) -> dict:
     return series_description
 
 
+@Loger.log
 def get_series_description(series):
     return describe_1d(series)
 
 
+@Loger.log
 def get_series_descriptions(df, pbar):
     def multiprocess_1d(args) -> Tuple[str, dict]:
         """Wrapper to process series in parallel.
@@ -448,6 +456,7 @@ def get_series_descriptions(df, pbar):
     return series_description
 
 
+@Loger.log
 def get_table_stats(df: pd.DataFrame, variable_stats: pd.DataFrame) -> dict:
     """General statistics for the DataFrame.
 
@@ -504,6 +513,7 @@ def get_table_stats(df: pd.DataFrame, variable_stats: pd.DataFrame) -> dict:
     return table_stats
 
 
+@Loger.log
 def get_missing_diagrams(df: pd.DataFrame, table_stats: dict) -> dict:
     """Gets the rendered diagrams for missing values.
 
@@ -566,6 +576,7 @@ def get_missing_diagrams(df: pd.DataFrame, table_stats: dict) -> dict:
     return missing
 
 
+@Loger.log
 def get_scatter_matrix(df, variables):
     if config["interactions"]["continuous"].get(bool):
         continuous_variables = [
@@ -584,6 +595,7 @@ def get_scatter_matrix(df, variables):
     return scatter_matrix
 
 
+@Loger.log
 def get_messages(table_stats, series_description, correlations):
     messages = check_table_messages(table_stats)
     for col, description in series_description.items():
