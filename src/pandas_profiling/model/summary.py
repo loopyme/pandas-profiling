@@ -22,7 +22,7 @@ from pandas_profiling.model.messages import (
     warning_type_date,
     check_correlation_messages,
 )
-from pandas_profiling.utils.log import Loger
+from pandas_profiling.utils.logger import Logger
 from pandas_profiling.visualisation.missing import (
     missing_bar,
     missing_matrix,
@@ -43,7 +43,7 @@ def sort_column_names(dct: Mapping, sort: str):
     return dct
 
 
-@Loger.log
+@Logger.log
 def describe_1d(series: pd.Series) -> dict:
     """Describe a series (infer the variable type, then calculate type-specific values).
 
@@ -395,12 +395,12 @@ def describe_1d(series: pd.Series) -> dict:
     return series_description
 
 
-@Loger.log
+@Logger.log
 def get_series_description(series):
     return describe_1d(series)
 
 
-@Loger.log
+@Logger.log
 def get_series_descriptions(df, pbar):
     def multiprocess_1d(args) -> Tuple[str, dict]:
         """Wrapper to process series in parallel.
@@ -456,7 +456,7 @@ def get_series_descriptions(df, pbar):
     return series_description
 
 
-@Loger.log
+@Logger.log
 def get_table_stats(df: pd.DataFrame, variable_stats: pd.DataFrame) -> dict:
     """General statistics for the DataFrame.
 
@@ -513,7 +513,7 @@ def get_table_stats(df: pd.DataFrame, variable_stats: pd.DataFrame) -> dict:
     return table_stats
 
 
-@Loger.log
+@Logger.log
 def get_missing_diagrams(df: pd.DataFrame, table_stats: dict) -> dict:
     """Gets the rendered diagrams for missing values.
 
@@ -576,7 +576,7 @@ def get_missing_diagrams(df: pd.DataFrame, table_stats: dict) -> dict:
     return missing
 
 
-@Loger.log
+@Logger.log
 def get_scatter_matrix(df, variables):
     if config["interactions"]["continuous"].get(bool):
         continuous_variables = [
@@ -595,7 +595,7 @@ def get_scatter_matrix(df, variables):
     return scatter_matrix
 
 
-@Loger.log
+@Logger.log
 def get_messages(table_stats, series_description, correlations):
     messages = check_table_messages(table_stats)
     for col, description in series_description.items():

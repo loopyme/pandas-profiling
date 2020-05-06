@@ -5,7 +5,7 @@ from time import time, strftime, gmtime
 import pandas as pd
 
 
-class Loger:
+class Logger:
     logs = {}
     start_time = time()
     running_functions = set()
@@ -30,12 +30,12 @@ class Loger:
 
             def wrapper(*args, **kwargs):
 
-                description = Loger._rename_description(
+                description = Logger._rename_description(
                     func_or_description.__qualname__
                 )
-                Loger._log_start(description)
+                Logger._log_start(description)
                 res = func_or_description(*args, **kwargs)
-                Loger._log_finished(description)
+                Logger._log_finished(description)
 
                 return res
 
@@ -46,10 +46,10 @@ class Loger:
 
             def decorator(func, description):
                 def wrapper(*args, **kwargs):
-                    new_description = Loger._rename_description(description)
-                    Loger._log_start(new_description)
+                    new_description = Logger._rename_description(description)
+                    Logger._log_start(new_description)
                     res = func(*args, **kwargs)
-                    Loger._log_finished(new_description)
+                    Logger._log_finished(new_description)
 
                     return res
 
@@ -85,8 +85,8 @@ class Loger:
                     res += (
                         "[{start_time}~{end_time} {proportion:2d}%] {level} "
                         "{description} spend {use_time:.2f} s\n".format(
-                            start_time=Loger._str_time(v[0]),
-                            end_time=Loger._str_time(v[1]),
+                            start_time=Logger._str_time(v[0]),
+                            end_time=Logger._str_time(v[1]),
                             proportion=int((100 * v[2]) // total_time),
                             level="├" + "-" * v[3],
                             description=k,
@@ -99,8 +99,8 @@ class Loger:
                     res += (
                         "[{start_time}~{end_time}] {level} "
                         "{description} spend {use_time:.2f} s\n".format(
-                            start_time=Loger._str_time(v[0]),
-                            end_time=Loger._str_time(v[1]),
+                            start_time=Logger._str_time(v[0]),
+                            end_time=Logger._str_time(v[1]),
                             level="-" * v[3],
                             description=k,
                             use_time=v[2],
@@ -152,19 +152,19 @@ class Loger:
 
     @staticmethod
     def _log_start(description):
-        Loger.add_log(description, start_time=time())
+        Logger.add_log(description, start_time=time())
 
     @staticmethod
     def _log_finished(description):
-        Loger.add_log(description, end_time=time())
+        Logger.add_log(description, end_time=time())
 
     @staticmethod
     def _rename_description(description):
         """Prevents function name duplication"""
         new_description = description
         i = 1
-        while new_description in Loger.logs.keys():
+        while new_description in Logger.logs.keys():
             new_description = description + f"<{i}>"
             i += 1
-        Loger.logs[new_description] = [None] * 4  # start_time,end_time,use_time,level
+        Logger.logs[new_description] = [None] * 4  # start_time,end_time,use_time,level
         return new_description

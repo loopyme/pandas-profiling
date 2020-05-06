@@ -1,6 +1,6 @@
 import pandas as pd
 
-from pandas_profiling import ProfileReport, Loger
+from pandas_profiling import ProfileReport, Logger
 
 
 def data_sets():
@@ -57,13 +57,13 @@ def assert_description_equal(d1, d2):
 
 def run_real_data():
     for df, name in data_sets():
-        Loger.clear()
+        Logger.clear()
         print("=" * 79)
         print(name, df.shape)
         profile = ProfileReport(df)
         profile.to_html()
-        print(f"Total time:{Loger.total_time()}")
-        print(Loger.to_str(time_fliter=0.1, proportion=True))
+        print(f"Total time:{Logger.total_time()}")
+        print(Logger.to_str(time_fliter=0.1, proportion=True))
 
 
 if __name__ == "__main__":

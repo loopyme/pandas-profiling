@@ -3,7 +3,7 @@ import warnings
 import pandas as pd
 from tqdm.auto import tqdm
 
-from pandas_profiling.utils.log import Loger
+from pandas_profiling.utils.logger import Logger
 from pandas_profiling.config import config as config
 from pandas_profiling.model.summary import (
     get_series_descriptions,
@@ -17,7 +17,7 @@ from pandas_profiling.model.correlations import calculate_correlation
 from pandas_profiling.version import __version__
 
 
-@Loger.log
+@Logger.log
 def describe(df: pd.DataFrame) -> dict:
     """Calculate the statistics for each series in this DataFrame.
 

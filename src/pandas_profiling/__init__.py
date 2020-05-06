@@ -20,7 +20,7 @@ from pandas_profiling.report import get_report_structure
 from pandas_profiling.report.presentation.abstract.renderable import Renderable
 from pandas_profiling.report.presentation.flavours.html import HTMLSequence
 from pandas_profiling.utils.dataframe import rename_index
-from pandas_profiling.utils.log import Loger
+from pandas_profiling.utils.logger import Logger
 from pandas_profiling.utils.paths import get_config_default, get_config_minimal
 from pandas_profiling.version import __version__
 
@@ -34,7 +34,7 @@ class ProfileReport(object):
     html = ""
     """the HTML representation of the report, without the wrapper (containing `<head>` etc.)"""
 
-    @Loger.log("Init ProfileReport")
+    @Logger.log("Init ProfileReport")
     def __init__(
         self,
         df=None,
@@ -108,7 +108,7 @@ class ProfileReport(object):
             )
 
     @staticmethod
-    @Loger.log
+    @Logger.log
     def preprocess(df):
         # Treat index as any other column
         if (
@@ -125,7 +125,7 @@ class ProfileReport(object):
         return df
 
     @staticmethod
-    @Loger.log
+    @Logger.log
     def get_sample(df: pd.DataFrame) -> dict:
         """Get head/tail samples based on the configuration
 
@@ -227,7 +227,7 @@ class ProfileReport(object):
 
             webbrowser.open_new_tab(output_file.absolute().as_uri())
 
-    @Loger.log
+    @Logger.log
     def to_html(self) -> str:
         """Generate and return complete template as lengthy string
             for using with frameworks.
@@ -269,7 +269,7 @@ class ProfileReport(object):
             )
         return wrapped_html
 
-    @Loger.log
+    @Logger.log
     def to_json(self) -> str:
         class CustomEncoder(json.JSONEncoder):
             def key_to_json(self, data):
@@ -291,7 +291,7 @@ class ProfileReport(object):
 
         return json.dumps(self.description_set, indent=4, cls=CustomEncoder)
 
-    @Loger.log
+    @Logger.log
     def to_notebook_iframe(self):
         """Used to output the HTML representation to a Jupyter notebook.
         When config.notebook.iframe.attribute is "src", this function creates a temporary HTML file
@@ -309,7 +309,7 @@ class ProfileReport(object):
 
         display(get_notebook_iframe(self))
 
-    @Loger.log
+    @Logger.log
     def to_widgets(self):
         """The ipython notebook widgets user interface."""
         from pandas_profiling.report.presentation.flavours import WidgetReport
@@ -325,7 +325,7 @@ class ProfileReport(object):
             )
         )
 
-    @Loger.log
+    @Logger.log
     def to_app(self):
         """
         (Experimental) PyQt5 user interface, not ready to be used.
@@ -353,7 +353,7 @@ class ProfileReport(object):
         """Override so that Jupyter Notebook does not print the object."""
         return ""
 
-    @Loger.log
+    @Logger.log
     def dumps(self) -> bytes:
         """
         Serialize ProfileReport and return bytes for reproducing ProfileReport or Caching.
@@ -370,7 +370,7 @@ class ProfileReport(object):
             [self.df_hash, config, self.sample, self._description_set, self._report]
         )
 
-    @Loger.log
+    @Logger.log
     def loads(self, data: bytes, ignore_config: bool = False):
         """
         Deserialize the bytes for reproducing ProfileReport or Caching.
